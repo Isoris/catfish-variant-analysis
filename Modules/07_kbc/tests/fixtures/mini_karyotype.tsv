@@ -1,0 +1,13 @@
+sample_id	inversion_id	karyotype_class
+S001	inv1	AA
+S002	inv1	AA
+S003	inv1	AB
+S004	inv1	AB
+S005	inv1	BB
+S006	inv1	BB
+S001	inv2	AA
+S002	inv2	AA
+S003	inv2	AB
+S004	inv2	AB
+S005	inv2	BB
+S006	inv2	BB

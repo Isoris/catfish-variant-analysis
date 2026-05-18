@@ -1,0 +1,7 @@
+sample_id	cohort	batch	is_pruned_unrelated	f_roh	ancestry_group
+S001	gariepinus_hatchery_226	B1	True	0.10	pop1
+S002	gariepinus_hatchery_226	B1	False	0.12	pop1
+S003	gariepinus_hatchery_226	B2	True	0.05	pop2
+S004	gariepinus_hatchery_226	B2	False	0.07	pop2
+S005	gariepinus_hatchery_226	B3	True	0.20	pop1
+S006	gariepinus_hatchery_226	B3	False	0.15	pop1

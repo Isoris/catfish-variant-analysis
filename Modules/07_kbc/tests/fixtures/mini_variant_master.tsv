@@ -1,0 +1,8 @@
+variant_id	chrom	pos	gene_id	consequence	impact
+chr1:1500:A:T	chr1	1500	G1	stop_gained	HIGH
+chr1:2500:G:GA	chr1	2500	G1	frameshift_variant	HIGH
+chr1:3000:C:T	chr1	3000	G2	missense_variant	MODERATE
+chr1:4000:G:T	chr1	4000	G3	splice_donor_variant	HIGH
+chr2:1500:A:G	chr2	1500	G4	stop_gained	HIGH
+chr2:2500:T:C	chr2	2500	G5	start_lost	HIGH
+chr2:3500:GA:G	chr2	3500	G6	frameshift_variant	HIGH
