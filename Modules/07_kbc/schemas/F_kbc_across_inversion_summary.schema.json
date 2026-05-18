@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Isoris/catfish-variant-analysis/Modules/07_kbc/schemas/F_kbc_across_inversion_summary.schema.json",
+  "title": "KBC Table F — kbc_across_inversion_summary (two sheets)",
+  "description": "Cohort-wide descriptive summary across the candidate inversion set. Spec emits this as one file with two sheets (SPEC_KBC.md §3.F). For TSV the two sheets are written as two files; each row validates against one of the two row types defined here.",
+  "oneOf": [
+    { "$ref": "#/$defs/sheet1_signal_class_counts" },
+    { "$ref": "#/$defs/sheet2_meta_analysis" }
+  ],
+  "$defs": {
+    "sheet1_signal_class_counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Sheet 1: one row per kbc_signal_class. Pure count summary — the 'final paragraph' table.",
+      "required": [
+        "kbc_signal_class",
+        "n_inversions",
+        "total_candidate_inversions"
+      ],
+      "properties": {
+        "kbc_signal_class": {
+          "type": "string",
+          "enum": [
+            "POD_compatible_AA_exposed",
+            "POD_compatible_BB_exposed",
+            "POD_compatible_both",
+            "asymmetric_AA_only",
+            "asymmetric_BB_only",
+            "no_signal",
+            "inconclusive_small_n",
+            "failed_synonymous_control"
+          ]
+        },
+        "n_inversions": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of inversions in this signal class (Tier 1)."
+        },
+        "median_delta_AA_vs_AB": {
+          "type": ["number", "null"]
+        },
+        "median_delta_BB_vs_AB": {
+          "type": ["number", "null"]
+        },
+        "iqr_delta_AA_vs_AB": {
+          "type": ["string", "null"],
+          "description": "\"Q1 – Q3\" formatted string."
+        },
+        "iqr_delta_BB_vs_AB": {
+          "type": ["string", "null"]
+        },
+        "median_complementation_index_AB": {
+          "type": ["number", "null"],
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "total_candidate_inversions": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Denominator — identical in every row."
+        }
+      }
+    },
+    "sheet2_meta_analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Sheet 2: random-effects meta-analytic summary on the well-behaved subset (excluding failed_synonymous_control and inconclusive_small_n).",
+      "required": [
+        "contrast",
+        "pooled_delta_random_effects",
+        "pooled_delta_95ci_low",
+        "pooled_delta_95ci_high",
+        "heterogeneity_i_squared",
+        "n_inversions_in_pool"
+      ],
+      "properties": {
+        "contrast": {
+          "type": "string",
+          "enum": ["AA_vs_AB", "BB_vs_AB"]
+        },
+        "pooled_delta_random_effects": {
+          "type": "number"
+        },
+        "pooled_delta_95ci_low": {
+          "type": "number"
+        },
+        "pooled_delta_95ci_high": {
+          "type": "number"
+        },
+        "heterogeneity_i_squared": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "I² between-inversion heterogeneity on [0, 1]."
+        },
+        "n_inversions_in_pool": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

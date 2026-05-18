@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Isoris/catfish-variant-analysis/Modules/07_kbc/schemas/E_kbc_per_inversion_report.schema.json",
+  "title": "KBC Table E — kbc_per_inversion_report",
+  "description": "One row per inversion. Flat headline table for the manuscript. Each of the three damaging-variant tiers (§1.8) gets its own signal class and delta columns. Source: SPEC_KBC.md §3.E.",
+  "type": "object",
+  "additionalProperties": false,
+  "$defs": {
+    "signal_class": {
+      "type": "string",
+      "enum": [
+        "POD_compatible_AA_exposed",
+        "POD_compatible_BB_exposed",
+        "POD_compatible_both",
+        "asymmetric_AA_only",
+        "asymmetric_BB_only",
+        "no_signal",
+        "inconclusive_small_n",
+        "failed_synonymous_control"
+      ]
+    }
+  },
+  "required": [
+    "inversion_id",
+    "pod_segment_with_largest_delta_tier1",
+    "tier1_signal_class",
+    "tier1_delta_AA_vs_AB",
+    "tier1_delta_BB_vs_AB",
+    "tier1_delta_AA_vs_AB_synonymous",
+    "tier1_delta_BB_vs_AB_synonymous",
+    "tier1_complementation_index_AB",
+    "tier1_n_variants",
+    "tier2_signal_class",
+    "tier2_delta_AA_vs_AB",
+    "tier2_delta_BB_vs_AB",
+    "tier2_delta_AA_vs_AB_synonymous",
+    "tier2_delta_BB_vs_AB_synonymous",
+    "tier2_complementation_index_AB",
+    "tier2_n_variants",
+    "tier2_enabled",
+    "tier3_signal_class",
+    "tier3_delta_AA_vs_AB",
+    "tier3_delta_BB_vs_AB",
+    "tier3_delta_AA_vs_AB_synonymous",
+    "tier3_delta_BB_vs_AB_synonymous",
+    "tier3_complementation_index_AB",
+    "tier3_n_variants",
+    "tier_concordance",
+    "headline_class",
+    "n_AA",
+    "n_AB",
+    "n_BB"
+  ],
+  "properties": {
+    "inversion_id": {
+      "type": "string"
+    },
+    "pod_segment_with_largest_delta_tier1": {
+      "type": "string",
+      "enum": ["L", "M", "R", "whole"],
+      "description": "Segment exhibiting the largest Tier 1 |delta|."
+    },
+
+    "tier1_signal_class": { "$ref": "#/$defs/signal_class" },
+    "tier1_delta_AA_vs_AB": { "type": ["number", "null"] },
+    "tier1_delta_BB_vs_AB": { "type": ["number", "null"] },
+    "tier1_delta_AA_vs_AB_synonymous": { "type": ["number", "null"] },
+    "tier1_delta_BB_vs_AB_synonymous": { "type": ["number", "null"] },
+    "tier1_complementation_index_AB": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "tier1_n_variants": { "type": "integer", "minimum": 0 },
+
+    "tier2_signal_class": {
+      "anyOf": [
+        { "$ref": "#/$defs/signal_class" },
+        { "type": "null" }
+      ],
+      "description": "Null when tier2_enabled = false."
+    },
+    "tier2_delta_AA_vs_AB": { "type": ["number", "null"] },
+    "tier2_delta_BB_vs_AB": { "type": ["number", "null"] },
+    "tier2_delta_AA_vs_AB_synonymous": { "type": ["number", "null"] },
+    "tier2_delta_BB_vs_AB_synonymous": { "type": ["number", "null"] },
+    "tier2_complementation_index_AB": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "tier2_n_variants": { "type": ["integer", "null"], "minimum": 0 },
+    "tier2_enabled": {
+      "type": "boolean",
+      "description": "False if splice validation (§1.9) did not pass. All tier2_* result columns are null in that case."
+    },
+
+    "tier3_signal_class": { "$ref": "#/$defs/signal_class" },
+    "tier3_delta_AA_vs_AB": { "type": ["number", "null"] },
+    "tier3_delta_BB_vs_AB": { "type": ["number", "null"] },
+    "tier3_delta_AA_vs_AB_synonymous": { "type": ["number", "null"] },
+    "tier3_delta_BB_vs_AB_synonymous": { "type": ["number", "null"] },
+    "tier3_complementation_index_AB": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "tier3_n_variants": { "type": "integer", "minimum": 0 },
+
+    "tier_concordance": {
+      "type": "string",
+      "enum": [
+        "all_three_pod_compatible",
+        "tier1_pod_only",
+        "tier2_3_pod_only",
+        "tier3_only_pod",
+        "all_three_no_signal",
+        "inconsistent"
+      ],
+      "description": "Tier-stability diagnostic — how the three tiers agree on signal class."
+    },
+    "headline_class": {
+      "$ref": "#/$defs/signal_class",
+      "description": "Always equals tier1_signal_class. This is what goes in the manuscript."
+    },
+
+    "n_AA": { "type": "integer", "minimum": 0 },
+    "n_AB": { "type": "integer", "minimum": 0 },
+    "n_BB": { "type": "integer", "minimum": 0 },
+
+    "dco_segment_test_p_tier1": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Tier 1 L-vs-M contrast within karyotype class, for double-CO PODs only."
+    },
+    "notes": {
+      "type": ["string", "null"]
+    }
+  }
+}

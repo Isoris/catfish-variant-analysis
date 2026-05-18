@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Isoris/catfish-variant-analysis/Modules/07_kbc/schemas/C_kbc_karyotype_burden_summary.schema.json",
+  "title": "KBC Table C — kbc_karyotype_burden_summary (per tier)",
+  "description": "One row per (tier, inversion, karyotype class, POD segment). The headline summary. Source: SPEC_KBC.md §3.C; tier column added per §4 Step 4 (the implementation loops over the three damaging-variant tiers and writes rows with a tier discriminator).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tier",
+    "inversion_id",
+    "karyotype_class",
+    "pod_segment",
+    "n_samples",
+    "n_samples_pruned_unrelated",
+    "mean_burden_score",
+    "median_burden_score",
+    "mean_hom_exposed_gene_count",
+    "mean_het_masked_gene_count",
+    "arrangement_private_damaging_count",
+    "arrangement_shared_damaging_count",
+    "complementation_index",
+    "exposure_delta_vs_AB",
+    "exposure_delta_vs_AB_hom_genes",
+    "wilcoxon_p_vs_AB",
+    "glm_kinship_p_vs_AB",
+    "n_genes_arrangement_specific"
+  ],
+  "properties": {
+    "tier": {
+      "type": "string",
+      "enum": ["T1", "T2", "T3"],
+      "description": "T1 = high-confidence LoF (manuscript headline); T2 = T1 + validated splice Class A; T3 = T2 + strong missense (exploratory). See SPEC_KBC.md §1.8."
+    },
+    "inversion_id": {
+      "type": "string"
+    },
+    "karyotype_class": {
+      "type": "string",
+      "enum": ["AA", "AB", "BB"],
+      "description": "NA samples are dropped before aggregation."
+    },
+    "pod_segment": {
+      "type": "string",
+      "enum": ["L", "M", "R", "whole"]
+    },
+    "n_samples": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "n_samples_pruned_unrelated": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "mean_burden_score": {
+      "type": "number"
+    },
+    "median_burden_score": {
+      "type": "number"
+    },
+    "mean_hom_exposed_gene_count": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "mean_het_masked_gene_count": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "arrangement_private_damaging_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "arrangement_shared_damaging_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "complementation_index": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "AB-only. Null for AA and BB rows. Fraction of damaging genes where A-side and B-side carry different damaging variants."
+    },
+    "exposure_delta_vs_AB": {
+      "type": ["number", "null"],
+      "description": "AA / BB only. Null for AB rows. mean_burden_score(this_class) − mean_burden_score(AB at same segment)."
+    },
+    "exposure_delta_vs_AB_hom_genes": {
+      "type": ["number", "null"],
+      "description": "AA / BB only. Null for AB. Same delta on mean_hom_exposed_gene_count."
+    },
+    "wilcoxon_p_vs_AB": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "AA / BB only. Null for AB. Mann-Whitney U on hom_exposed_gene_count, this class vs AB, on the NAToRA-pruned subset."
+    },
+    "glm_kinship_p_vs_AB": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "AA / BB only. Null for AB. Full-cohort kinship-corrected mixed-model p."
+    },
+    "n_genes_arrangement_specific": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Genes hit by ≥ 1 arrangement-private damaging variant."
+    }
+  }
+}

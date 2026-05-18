@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Isoris/catfish-variant-analysis/Modules/07_kbc/schemas/A_kbc_sample_inversion_burden.schema.json",
+  "title": "KBC Table A — kbc_sample_inversion_burden",
+  "description": "One row per (sample, inversion, POD segment). Per-sample, per-segment burden counts. Source: SPEC_KBC.md §3.A.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sample_id",
+    "inversion_id",
+    "pod_segment",
+    "karyotype_class",
+    "n_damaging_variants",
+    "het_masked_gene_count",
+    "hom_exposed_gene_count",
+    "compound_het_unknown_gene_count",
+    "burden_score_sum",
+    "is_pruned_unrelated"
+  ],
+  "properties": {
+    "sample_id": {
+      "type": "string",
+      "description": "Sample identifier from the project sample sheet."
+    },
+    "inversion_id": {
+      "type": "string",
+      "description": "Inversion identifier from the inversion atlas."
+    },
+    "pod_segment": {
+      "type": "string",
+      "enum": ["L", "M", "R", "whole"],
+      "description": "POD partition: L / M / R for double-crossover candidates; whole for single-crossover."
+    },
+    "karyotype_class": {
+      "type": "string",
+      "enum": ["AA", "AB", "BB", "NA"],
+      "description": "PCAngsd K=3 + Hungarian-matched karyotype. NA = posterior below project cutoff."
+    },
+    "n_damaging_variants": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Damaging variants this sample carries inside the segment. Informational only — not used as the response variable; see §1.3."
+    },
+    "het_masked_gene_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Genes where one copy carries a damaging variant and the other is intact (no in-trans damaging variant at the same gene; no ROH overlap)."
+    },
+    "hom_exposed_gene_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Genes where both copies are damaged (homozygous variant, or a single het inside an ROH-promoted region). This is the headline burden quantity."
+    },
+    "compound_het_unknown_gene_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Genes with two or more damaging hets where phase is not determinable from genotype alone. NOT counted as hom_exposed."
+    },
+    "burden_score_sum": {
+      "type": "number",
+      "description": "Sum of per-variant scores (from scoring_weights.tsv), restricted to damaging classes."
+    },
+    "is_pruned_unrelated": {
+      "type": "boolean",
+      "description": "True if sample is in the NAToRA-pruned 81-unrelated subset."
+    },
+    "roh_overlap_frac": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Fraction of this segment covered by ROH for this sample."
+    },
+    "f_roh": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Per-sample F_ROH covariate."
+    },
+    "ancestry_group": {
+      "type": ["string", "null"],
+      "description": "NGSadmix best-K hard call."
+    }
+  }
+}

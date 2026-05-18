@@ -1,0 +1,4 @@
+# KBC outputs land under ${BASE}/results/catfish-variant-analysis/07_kbc/.
+# This in-tree outputs/ directory is for local development only — ignore everything.
+*
+!.gitignore
