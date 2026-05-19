@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Isoris/catfish-variant-analysis/docs/atlas_schemas/clair3.in.schema.json",
+  "title": "Clair3 IN — per-sample small-variant calling manifest",
+  "description": "One object per Clair3 invocation. Describes the inputs Clair3 needs to produce a per-sample VCF. See Modules/03_clair3.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sample_id",
+    "bam_path",
+    "bam_index_path",
+    "reference_fasta_path",
+    "reference_fasta_index_path",
+    "model_path",
+    "platform",
+    "out_vcf_path"
+  ],
+  "properties": {
+    "sample_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Sample identifier from the project sample sheet. Becomes the VCF sample column header."
+    },
+    "bam_path": {
+      "type": "string",
+      "description": "Absolute path to the input BAM. Read-group SM tag should match sample_id."
+    },
+    "bam_index_path": {
+      "type": "string",
+      "description": "Absolute path to the BAM .bai (or .csi) index."
+    },
+    "reference_fasta_path": {
+      "type": "string",
+      "description": "Absolute path to the reference FASTA used during alignment (fClaHyb_Gar_LG.fa for this project)."
+    },
+    "reference_fasta_index_path": {
+      "type": "string",
+      "description": "Absolute path to the reference .fai index."
+    },
+    "model_path": {
+      "type": "string",
+      "description": "Absolute path to the Clair3 model directory matching the sequencing platform (e.g. ont_guppy5, ilmn)."
+    },
+    "platform": {
+      "type": "string",
+      "enum": ["ont", "ilmn", "hifi"],
+      "description": "Sequencing platform — selects pileup vs full-alignment defaults."
+    },
+    "region_bed_path": {
+      "type": ["string", "null"],
+      "description": "Optional callable-region BED. When provided, Clair3 is restricted to these intervals. Typically the cohort callable mask from Module 01."
+    },
+    "min_coverage": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 2,
+      "description": "Minimum read depth at a candidate site."
+    },
+    "min_mq": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 5,
+      "description": "Minimum mapping quality for reads contributing to the pileup."
+    },
+    "snp_min_af": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.08,
+      "description": "Candidate-site minor allele fraction threshold for SNPs."
+    },
+    "indel_min_af": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.15,
+      "description": "Candidate-site minor allele fraction threshold for indels."
+    },
+    "haploid_sex_chrom_contigs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Contigs to genotype as haploid for this sample (e.g. ChrY/W in homogametic vs heterogametic samples). Empty if the project treats the genome as diploid throughout."
+    },
+    "threads": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 8
+    },
+    "out_vcf_path": {
+      "type": "string",
+      "description": "Absolute path where the bgzipped per-sample VCF will be written (e.g. ${BASE}/results/clair3/<sample_id>.vcf.gz)."
+    }
+  }
+}

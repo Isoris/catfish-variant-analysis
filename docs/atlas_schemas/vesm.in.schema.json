@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Isoris/catfish-variant-analysis/docs/atlas_schemas/vesm.in.schema.json",
+  "title": "VESM IN — per-missense scoring request",
+  "description": "One row per (transcript, protein_position, alt_aa) for which a VESM log-likelihood ratio is requested. VESM = ESM1b-based protein-language-model variant effect score; LLR is the per-residue log-likelihood-ratio of mutant vs reference under the masked LM. KBC consumes the LLR column from variant_master_scored.tsv (Tier 3 cutoff: LLR ≤ −7).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "variant_id",
+    "transcript_id",
+    "gene_id",
+    "protein_id",
+    "protein_position",
+    "ref_aa",
+    "alt_aa",
+    "protein_sequence"
+  ],
+  "properties": {
+    "variant_id": {
+      "type": "string",
+      "description": "Canonical variant id from Clair3 OUT — '{chrom}:{pos}:{ref}:{alt}'. Carried through so VESM OUT can be joined back to the variant table."
+    },
+    "transcript_id": {
+      "type": "string",
+      "description": "GFF3 transcript_id (canonical transcript for the gene when ambiguous)."
+    },
+    "gene_id": {
+      "type": "string"
+    },
+    "protein_id": {
+      "type": "string",
+      "description": "GFF3 protein_id derived from the transcript's CDS."
+    },
+    "protein_position": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "1-based amino-acid position in the reference protein where the substitution occurs."
+    },
+    "ref_aa": {
+      "type": "string",
+      "pattern": "^[ACDEFGHIKLMNPQRSTVWY*]$",
+      "description": "Single-letter reference amino acid. Must match protein_sequence[protein_position-1]. '*' is stop."
+    },
+    "alt_aa": {
+      "type": "string",
+      "pattern": "^[ACDEFGHIKLMNPQRSTVWY*]$",
+      "description": "Single-letter alternate amino acid resulting from this variant. Stop ('*') is in-vocabulary but VESM behaviour at stops is implementation-defined."
+    },
+    "protein_sequence": {
+      "type": "string",
+      "pattern": "^[ACDEFGHIKLMNPQRSTVWY*]+$",
+      "minLength": 1,
+      "description": "Full reference protein sequence in single-letter AA code. Required so VESM can compute the masked-position likelihood without re-deriving from a GFF3."
+    },
+    "protein_sequence_source": {
+      "type": "string",
+      "enum": ["reference_frame", "haplotype_aware"],
+      "default": "reference_frame",
+      "description": "Whether the protein_sequence comes from a straight reference-frame translation of the canonical transcript ('reference_frame', used by MODULE_CONSERVATION) or from a haplotype-resolved translation that incorporates upstream in-cis variants ('haplotype_aware', used by HAPS). KBC's headline uses reference_frame; HAPS produces the haplotype_aware overlay column vesm_llr_haplotype_aware."
+    },
+    "model_name": {
+      "type": "string",
+      "default": "esm1b_t33_650M_UR50S",
+      "description": "ESM model used to compute the LLR. Recorded for reproducibility."
+    },
+    "model_revision": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "Optional model weight checksum or release tag, when stricter provenance is needed."
+    }
+  }
+}

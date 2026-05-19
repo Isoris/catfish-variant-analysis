@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Isoris/catfish-variant-analysis/docs/atlas_schemas/vesm.out.schema.json",
+  "title": "VESM OUT — per-missense LLR score",
+  "description": "One row per request from VESM IN. Carries the LLR plus the per-residue probabilities used to compute it, so downstream filters (e.g. KBC Tier 3 cutoff LLR ≤ −7) can be re-derived or audited without re-running the model.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "variant_id",
+    "transcript_id",
+    "protein_position",
+    "ref_aa",
+    "alt_aa",
+    "vesm_llr",
+    "model_name",
+    "protein_sequence_source"
+  ],
+  "properties": {
+    "variant_id": {
+      "type": "string"
+    },
+    "transcript_id": {
+      "type": "string"
+    },
+    "protein_position": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "ref_aa": {
+      "type": "string",
+      "pattern": "^[ACDEFGHIKLMNPQRSTVWY*]$"
+    },
+    "alt_aa": {
+      "type": "string",
+      "pattern": "^[ACDEFGHIKLMNPQRSTVWY*]$"
+    },
+    "vesm_llr": {
+      "type": "number",
+      "description": "log(p_alt / p_ref) at the masked position, natural log. More negative = more deleterious. Project Tier 3 cutoff is LLR ≤ −7."
+    },
+    "p_ref": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Masked-language-model probability assigned to the reference amino acid."
+    },
+    "p_alt": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Masked-language-model probability assigned to the alternate amino acid."
+    },
+    "rank_alt": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 20,
+      "description": "Rank of the alternate amino acid among the 20 standard residues at this position (1 = highest probability). Optional diagnostic."
+    },
+    "model_name": {
+      "type": "string",
+      "description": "ESM model used (echoed from VESM IN)."
+    },
+    "model_revision": {
+      "type": ["string", "null"]
+    },
+    "protein_sequence_source": {
+      "type": "string",
+      "enum": ["reference_frame", "haplotype_aware"],
+      "description": "Echoed from VESM IN. The two sources must be kept in separate output rows / columns so the headline KBC analysis (reference_frame) is not silently overwritten by HAPS's haplotype_aware overlay. See Modules/07_kbc/UMBRELLA_README.md."
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "ref_mismatch",
+          "sequence_truncated",
+          "context_too_short",
+          "stop_codon_in_context",
+          "non_standard_aa"
+        ]
+      },
+      "default": [],
+      "description": "Non-fatal model-side caveats. 'ref_mismatch' means VESM IN's ref_aa disagreed with protein_sequence at protein_position — the row should be considered low-confidence."
+    }
+  }
+}

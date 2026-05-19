@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Isoris/catfish-variant-analysis/docs/atlas_schemas/deleterious_conservation.in.schema.json",
+  "title": "Deleterious/Conservation IN — per-variant annotation request",
+  "description": "One row per biallelic variant from the joint VCF. Provides the minimum context required to assign SnpEff consequence, SIFT4G class, VESM LLR, splice subclass, and per-variant burden score. Maps to MODULE_CONSERVATION steps 12–16 in the project.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "variant_id",
+    "chrom",
+    "pos",
+    "ref",
+    "alt",
+    "gff3_path",
+    "reference_fasta_path"
+  ],
+  "properties": {
+    "variant_id": {
+      "type": "string",
+      "description": "Canonical variant id '{chrom}:{pos}:{ref}:{alt}', post left-normalization, post bi-allelic split."
+    },
+    "chrom": { "type": "string", "minLength": 1 },
+    "pos": { "type": "integer", "minimum": 1 },
+    "ref": { "type": "string", "pattern": "^[ACGTNacgtn]+$" },
+    "alt": { "type": "string", "pattern": "^[ACGTNacgtn]+$" },
+    "gff3_path": {
+      "type": "string",
+      "description": "GFF3 annotation supplying gene_id, transcript_id, CDS coordinates, protein_id. Same file consumed by KBC for gene spans."
+    },
+    "reference_fasta_path": {
+      "type": "string",
+      "description": "Reference FASTA used for codon translation and splice-site dinucleotide checks."
+    },
+    "annotators": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "snpeff": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "database": { "type": ["string", "null"], "description": "SnpEff database name (built from the project GFF3 + reference)." }
+          }
+        },
+        "sift4g": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "protein_db_path": { "type": ["string", "null"], "description": "Path to the per-protein SIFT4G prediction directory." }
+          }
+        },
+        "vesm": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "model_name": { "type": "string", "default": "esm1b_t33_650M_UR50S" },
+            "protein_sequence_source": {
+              "type": "string",
+              "enum": ["reference_frame", "haplotype_aware"],
+              "default": "reference_frame"
+            }
+          }
+        },
+        "splice_module": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "validation_status": {
+              "type": "string",
+              "enum": ["pending", "passed", "failed"],
+              "default": "pending",
+              "description": "Status of the six-check validation gate in SPEC_KBC.md §1.9. Until 'passed', KBC Tier 2 stays disabled."
+            }
+          }
+        },
+        "scoring_weights_path": {
+          "type": ["string", "null"],
+          "description": "Path to scoring_weights.tsv (consequence → weight). When null, per-variant weight defaults to 1.0."
+        }
+      }
+    }
+  }
+}
