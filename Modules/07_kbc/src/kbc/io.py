@@ -8,6 +8,11 @@ Reads:
 - sample metadata
 - scoring weights  (optional; consequence → weight)
 - ROH BEDs per sample  (optional; used by gene_status case 3)
+- GFF3 gene spans          (optional; supplies proper gene coordinates
+                            for the ROH-overlap test in gene_status case 3.
+                            When absent, gene_status falls back to the
+                            bounding box of Tier-1 damaging variants in
+                            the gene — a documented MVP 1 approximation.)
 """
 
 from __future__ import annotations
@@ -184,6 +189,71 @@ def load_scoring_weights(path: str | Path | None) -> dict[str, float]:
     if not {"consequence", "weight"}.issubset(df.columns):
         return {}
     return {str(r.consequence): float(r.weight) for r in df.itertuples(index=False)}
+
+
+# --- GFF3 gene spans -------------------------------------------------------
+
+# Attribute keys (in order of preference) used to resolve the gene_id from a
+# GFF3 row's 9th column. The first key that yields a non-empty value wins.
+# When the value is prefixed with the GFF Sequence-Ontology prefix `gene-`
+# (Ensembl/NCBI convention), the prefix is stripped to recover the bare ID.
+GFF3_GENE_ID_KEYS = ("gene_id", "ID", "Name", "gene_name")
+
+
+def _parse_gff3_attributes(field: str) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for tok in field.strip().split(";"):
+        tok = tok.strip()
+        if not tok or "=" not in tok:
+            continue
+        k, v = tok.split("=", 1)
+        out[k.strip()] = v.strip()
+    return out
+
+
+def _resolve_gene_id(attrs: dict[str, str]) -> str | None:
+    for k in GFF3_GENE_ID_KEYS:
+        v = attrs.get(k)
+        if v:
+            return v[len("gene-"):] if v.startswith("gene-") else v
+    return None
+
+
+def load_gene_spans(path: str | Path | None) -> dict[str, tuple[str, int, int]]:
+    """Parse a GFF3 file and return gene_id → (chrom, start, end).
+
+    Looks at lines where the type (column 3) is exactly `gene`. Both 1-based
+    GFF coordinates are converted to 0-based half-open (start-1, end).
+
+    Returns an empty dict if `path` is None or the file is missing.
+    """
+    if path is None:
+        return {}
+    p = Path(path)
+    if not p.exists():
+        return {}
+    spans: dict[str, tuple[str, int, int]] = {}
+    with p.open() as fh:
+        for line in fh:
+            if not line or line.startswith("#"):
+                continue
+            cols = line.rstrip("\n").split("\t")
+            if len(cols) < 9:
+                continue
+            if cols[2] != "gene":
+                continue
+            chrom = cols[0]
+            try:
+                start1 = int(cols[3])
+                end1 = int(cols[4])
+            except ValueError:
+                continue
+            attrs = _parse_gff3_attributes(cols[8])
+            gene_id = _resolve_gene_id(attrs)
+            if gene_id is None:
+                continue
+            spans[gene_id] = (chrom, start1 - 1, end1)
+    return spans
 
 
 # --- ROH BEDs --------------------------------------------------------------

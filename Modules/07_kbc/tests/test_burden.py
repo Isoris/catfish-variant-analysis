@@ -13,6 +13,7 @@ import pytest
 
 from kbc.burden import build_table_a
 from kbc.io import (
+    load_gene_spans,
     load_genotypes_tsv,
     load_inversion_intervals,
     load_karyotypes,
@@ -23,13 +24,14 @@ from kbc.io import (
 
 
 @pytest.fixture
-def table_a(variant_master_path, genotypes_path, karyotypes_path, inversions_path, samples_path, roh_dir):
+def table_a(variant_master_path, genotypes_path, karyotypes_path, inversions_path, samples_path, roh_dir, gff_path):
     vm = load_variant_master(variant_master_path)
     gt = load_genotypes_tsv(genotypes_path)
     kary = load_karyotypes(karyotypes_path)
     invs = load_inversion_intervals(inversions_path)
     samples = load_sample_metadata(samples_path)
     roh = load_roh_intervals(roh_dir)
+    spans = load_gene_spans(gff_path)
     return build_table_a(
         variant_master=vm,
         genotypes=gt,
@@ -38,6 +40,7 @@ def table_a(variant_master_path, genotypes_path, karyotypes_path, inversions_pat
         sample_metadata=samples,
         scoring_weights=None,
         roh_intervals=roh,
+        gene_spans=spans,
     )
 
 

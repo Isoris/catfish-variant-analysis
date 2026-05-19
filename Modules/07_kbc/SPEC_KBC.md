@@ -619,6 +619,18 @@ case 4: two or more variants in 0/1 state, no 1/1
 headline counts are not inflated by ambiguous compound hets. The signal
 classification in table E uses `hom_exposed_gene_count` only.
 
+**Note on the case 3 ROH-overlap test (added at MVP 1 audit).** "ROH(S)
+covers the gene" is evaluated as a half-open interval overlap between
+each of sample S's ROH intervals and the gene's coordinate span. The
+gene span is taken from a GFF3 annotation when provided (production
+path; recommended); when GFF3 is unavailable the gene span falls back
+to the bounding box of the gene's Tier-1 damaging variants in the
+segment, and the gene record carries `span_source = "variant_bbox"`
+through the per-gene record so downstream summaries can audit how many
+genes were classified under the fallback. The current implementation
+treats "overlap" rather than "fully contained" as the trigger; this is
+the more permissive reading of the spec text and is open for audit.
+
 ---
 
 ## 6. Variant-to-arrangement assignment rules (Step 3)

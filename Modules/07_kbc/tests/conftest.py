@@ -42,3 +42,8 @@ def samples_path() -> Path:
 @pytest.fixture
 def roh_dir() -> Path:
     return FIXTURES / "roh"
+
+
+@pytest.fixture
+def gff_path() -> Path:
+    return FIXTURES / "mini_genes.gff3"

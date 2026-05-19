@@ -25,8 +25,8 @@ def _gene(*variant_ids: str) -> GeneVariants:
         gene_id="G",
         variant_ids=variant_ids,
         chrom="chr1",
-        gene_min_pos=1000,
-        gene_max_pos=2000,
+        gene_start=1000,
+        gene_end=2000,
     )
 
 

@@ -31,6 +31,7 @@ sys.path.insert(0, str(MODULE_ROOT / "src"))
 
 from kbc.burden import build_table_a  # noqa: E402
 from kbc.io import (  # noqa: E402
+    load_gene_spans,
     load_genotypes_tsv,
     load_genotypes_vcf,
     load_inversion_intervals,
@@ -56,6 +57,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", required=True, type=Path)
     parser.add_argument("--scoring-weights", type=Path, default=None)
     parser.add_argument("--roh-dir", type=Path, default=None)
+    parser.add_argument("--gff3", type=Path, default=None,
+                        help="GFF3 annotation. Used for proper gene spans in the ROH-promotion check (§5 case 3). "
+                             "When absent, gene span falls back to the bounding box of Tier-1 damaging variants.")
     parser.add_argument("--cohort-tag", type=str, default=None,
                         help="If set, asserts every sample's `cohort` column equals this tag.")
     args = parser.parse_args(argv)
@@ -69,6 +73,7 @@ def main(argv: list[str] | None = None) -> int:
     metadata = load_sample_metadata(args.sample_metadata)
     weights = load_scoring_weights(args.scoring_weights)
     roh = load_roh_intervals(args.roh_dir)
+    gene_spans = load_gene_spans(args.gff3)
 
     if args.cohort_tag is not None and "cohort" in metadata.columns:
         bad = metadata[metadata["cohort"] != args.cohort_tag]
@@ -92,6 +97,7 @@ def main(argv: list[str] | None = None) -> int:
         sample_metadata=metadata,
         scoring_weights=weights,
         roh_intervals=roh,
+        gene_spans=gene_spans,
     )
 
     args.out.parent.mkdir(parents=True, exist_ok=True)

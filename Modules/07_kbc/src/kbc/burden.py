@@ -109,19 +109,38 @@ def _annotate_variants_with_segment(
     return pd.DataFrame(annot_rows)
 
 
-def _genes_in_segment(annotated: pd.DataFrame) -> dict[tuple[str, str, str], GeneVariants]:
-    """Group Tier-1 damaging variants by (inversion_id, pod_segment, gene_id)."""
+def _genes_in_segment(
+    annotated: pd.DataFrame,
+    gene_spans: Mapping[str, tuple[str, int, int]] | None = None,
+) -> dict[tuple[str, str, str], GeneVariants]:
+    """Group Tier-1 damaging variants by (inversion_id, pod_segment, gene_id).
+
+    When a GFF-derived gene span is available for the gene, use it; otherwise
+    fall back to the bounding box of the gene's damaging variants in this
+    segment (the MVP 1 approximation).
+    """
     tier1 = annotated[annotated["consequence"].map(is_tier1_lof)]
     grouped: dict[tuple[str, str, str], GeneVariants] = {}
     for (inv, seg, gene), sub in tier1.groupby(["inversion_id", "pod_segment", "gene_id"]):
         if pd.isna(gene) or gene == "":
             continue
-        grouped[(inv, seg, gene)] = GeneVariants(
-            gene_id=str(gene),
+        gene_id = str(gene)
+        chrom = str(sub["chrom"].iloc[0])
+        gff = gene_spans.get(gene_id) if gene_spans else None
+        if gff is not None and gff[0] == chrom:
+            _, start, end = gff
+            span_source = "gff"
+        else:
+            start = int(sub["pos"].min())
+            end = int(sub["pos"].max()) + 1   # half-open from inclusive max-position
+            span_source = "variant_bbox"
+        grouped[(inv, seg, gene_id)] = GeneVariants(
+            gene_id=gene_id,
             variant_ids=tuple(sub["variant_id"].astype(str).tolist()),
-            chrom=str(sub["chrom"].iloc[0]),
-            gene_min_pos=int(sub["pos"].min()),
-            gene_max_pos=int(sub["pos"].max()),
+            chrom=chrom,
+            gene_start=start,
+            gene_end=end,
+            span_source=span_source,
         )
     return grouped
 
@@ -134,13 +153,20 @@ def build_table_a(
     sample_metadata: pd.DataFrame,
     scoring_weights: Mapping[str, float] | None = None,
     roh_intervals: Mapping[str, pd.DataFrame] | None = None,
+    gene_spans: Mapping[str, tuple[str, int, int]] | None = None,
 ) -> pd.DataFrame:
-    """Build Table A: one row per (sample, inversion, segment). Tier 1 only."""
+    """Build Table A: one row per (sample, inversion, segment). Tier 1 only.
+
+    `gene_spans` (gene_id → (chrom, start, end), 0-based half-open) is consulted
+    for the ROH-overlap test in §5 case 3. When absent or when a gene_id is not
+    in the map, the gene span falls back to the bounding box of Tier-1 damaging
+    variants in that gene (see Modules/07_kbc/SPEC_KBC.md §5 note).
+    """
     scoring_weights = scoring_weights or {}
     roh_intervals = roh_intervals or {}
 
     annotated = _annotate_variants_with_segment(variant_master, inversion_intervals)
-    genes_by_seg = _genes_in_segment(annotated)
+    genes_by_seg = _genes_in_segment(annotated, gene_spans=gene_spans)
 
     # Tier 1 variants × their (inversion, segment) annotations
     tier1_var_df = annotated[annotated["consequence"].map(is_tier1_lof)]

@@ -23,6 +23,7 @@ mkdir -p "${KBC_RESULTS}"
 # --- Inputs (canonical project locations) ----------------------------------
 : "${VARIANT_MASTER:=${BASE}/results/MODULE_CONSERVATION/step16/variant_master_scored.tsv}"
 : "${JOINT_VCF:=${BASE}/results/MODULE_CONSERVATION/step03/joint.vcf.gz}"
+: "${GFF3:=${BASE}/00-samples/fClaHyb_Gar_LG.gff3}"
 : "${INVERSION_KARYOTYPES:=${BASE}/results/inversion_atlas/karyotypes_PCAngsd_K3_hungarian.tsv}"
 : "${INVERSION_INTERVALS:=${BASE}/results/inversion_atlas/intervals_with_pod_partition.tsv}"
 : "${SAMPLE_METADATA:=${BASE}/01_inputs_check/samples.tsv}"

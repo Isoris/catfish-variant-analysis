@@ -33,28 +33,34 @@ STATUS_COMPOUND_HET_UNKNOWN = "compound_het_unknown"
 
 @dataclass
 class GeneVariants:
-    """The damaging variants in one gene × segment, in the format the classifier needs."""
+    """The damaging variants in one gene × segment, in the format the classifier needs.
+
+    `gene_start` / `gene_end` are 0-based half-open. When a GFF3 gene span is
+    available they come from the GFF; otherwise they fall back to the bounding
+    box of the gene's Tier-1 damaging variants (a documented MVP 1
+    approximation — see Modules/07_kbc/SPEC_KBC.md §5).
+    """
 
     gene_id: str
     variant_ids: tuple[str, ...]
     chrom: str
-    # ROH overlap is queried by chrom + gene span; gene span is approximated as
-    # the min/max position of damaging variants in the gene for MVP 1 (a gene's
-    # full coordinate span would need GFF; not required for ROH-promotion since
-    # an ROH covering any damaging variant in the gene implies hom-coverage
-    # for that variant locus).
-    gene_min_pos: int
-    gene_max_pos: int
+    gene_start: int
+    gene_end: int
+    span_source: str = "variant_bbox"   # "gff" or "variant_bbox"
 
 
 def gene_overlaps_any_roh(gene: GeneVariants, roh_df: pd.DataFrame | None) -> bool:
-    """True if any ROH interval for this sample overlaps the gene span."""
+    """True if any ROH interval for this sample overlaps the gene span.
+
+    Uses half-open interval overlap: ROH ∩ gene non-empty iff
+    roh.start < gene.gene_end AND roh.end > gene.gene_start.
+    """
     if roh_df is None or roh_df.empty:
         return False
     hits = roh_df[
         (roh_df["chrom"] == gene.chrom)
-        & (roh_df["start"] < gene.gene_max_pos)
-        & (roh_df["end"] > gene.gene_min_pos)
+        & (roh_df["start"] < gene.gene_end)
+        & (roh_df["end"] > gene.gene_start)
     ]
     return not hits.empty
 

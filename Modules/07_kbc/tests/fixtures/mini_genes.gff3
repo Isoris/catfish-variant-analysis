@@ -1,0 +1,8 @@
+##gff-version 3
+##source mini fixture for KBC tests
+chr1	mini	gene	1001	3000	.	+	.	ID=G1;gene_name=G1
+chr1	mini	gene	2801	3200	.	+	.	ID=G2;gene_name=G2
+chr1	mini	gene	3801	4200	.	+	.	ID=G3;gene_name=G3
+chr2	mini	gene	1201	1800	.	+	.	ID=G4;gene_name=G4
+chr2	mini	gene	2201	2800	.	+	.	ID=G5;gene_name=G5
+chr2	mini	gene	3201	3800	.	+	.	ID=G6;gene_name=G6
