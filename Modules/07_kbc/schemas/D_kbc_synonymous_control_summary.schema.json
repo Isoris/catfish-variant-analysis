@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Isoris/catfish-variant-analysis/Modules/07_kbc/schemas/D_kbc_synonymous_control_summary.schema.json",
+  "title": "KBC Table D — kbc_synonymous_control_summary (per tier)",
+  "description": "Identical shape to Table C but computed on the synonymous-variant negative control set. Source: SPEC_KBC.md §3.D and §4 Step 5. The synonymous variant set itself does not change between tiers, but each tier's POD-compatibility decision uses its own synonymous comparator, so the table carries the tier discriminator alongside C.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tier",
+    "inversion_id",
+    "karyotype_class",
+    "pod_segment",
+    "n_samples",
+    "n_samples_pruned_unrelated",
+    "mean_burden_score",
+    "median_burden_score",
+    "mean_hom_exposed_gene_count",
+    "mean_het_masked_gene_count",
+    "arrangement_private_damaging_count",
+    "arrangement_shared_damaging_count",
+    "complementation_index",
+    "exposure_delta_vs_AB",
+    "exposure_delta_vs_AB_hom_genes",
+    "wilcoxon_p_vs_AB",
+    "glm_kinship_p_vs_AB",
+    "n_genes_arrangement_specific"
+  ],
+  "properties": {
+    "tier": {
+      "type": "string",
+      "enum": ["T1", "T2", "T3"]
+    },
+    "inversion_id": {
+      "type": "string"
+    },
+    "karyotype_class": {
+      "type": "string",
+      "enum": ["AA", "AB", "BB"]
+    },
+    "pod_segment": {
+      "type": "string",
+      "enum": ["L", "M", "R", "whole"]
+    },
+    "n_samples": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "n_samples_pruned_unrelated": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "mean_burden_score": {
+      "type": "number",
+      "description": "On synonymous variants."
+    },
+    "median_burden_score": {
+      "type": "number"
+    },
+    "mean_hom_exposed_gene_count": {
+      "type": "number",
+      "minimum": 0.0,
+      "description": "Hom-exposed gene count on synonymous variants — the neutral negative-control quantity."
+    },
+    "mean_het_masked_gene_count": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "arrangement_private_damaging_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Despite the column name, this is the synonymous-private count on the same arrangement-background classifier."
+    },
+    "arrangement_shared_damaging_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "complementation_index": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "exposure_delta_vs_AB": {
+      "type": ["number", "null"]
+    },
+    "exposure_delta_vs_AB_hom_genes": {
+      "type": ["number", "null"]
+    },
+    "wilcoxon_p_vs_AB": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "glm_kinship_p_vs_AB": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "n_genes_arrangement_specific": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Isoris/catfish-variant-analysis/Modules/07_kbc/schemas/B_kbc_variant_arrangement_assignments.schema.json",
+  "title": "KBC Table B — kbc_variant_arrangement_assignments",
+  "description": "For each damaging variant inside an inversion interval, which arrangement background (A / B / shared) it sits on. Source: SPEC_KBC.md §3.B and §6.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "variant_id",
+    "inversion_id",
+    "pod_segment",
+    "consequence",
+    "impact",
+    "sift_class",
+    "vesm_llr",
+    "splice_subclass",
+    "arrangement_background",
+    "assignment_method",
+    "n_AA_samples_alt",
+    "n_AB_samples_alt",
+    "n_BB_samples_alt",
+    "f_AA",
+    "f_AB",
+    "f_BB",
+    "assignment_confidence"
+  ],
+  "properties": {
+    "variant_id": {
+      "type": "string",
+      "description": "chrom:pos:ref:alt."
+    },
+    "inversion_id": {
+      "type": "string"
+    },
+    "pod_segment": {
+      "type": "string",
+      "enum": ["L", "M", "R", "whole"]
+    },
+    "gene_id": {
+      "type": ["string", "null"]
+    },
+    "transcript_id": {
+      "type": ["string", "null"]
+    },
+    "consequence": {
+      "type": "string",
+      "description": "SnpEff consequence from variant_master_scored.tsv."
+    },
+    "impact": {
+      "type": "string",
+      "description": "SnpEff impact: HIGH / MODERATE / LOW / MODIFIER."
+    },
+    "sift_class": {
+      "type": ["string", "null"],
+      "description": "SIFT4G class (deleterious / tolerated / NA)."
+    },
+    "vesm_llr": {
+      "type": ["number", "null"]
+    },
+    "splice_subclass": {
+      "type": ["string", "null"],
+      "description": "SPLICE_SUBCLASS from the splice module."
+    },
+    "arrangement_background": {
+      "type": "string",
+      "enum": ["A_private", "B_private", "shared", "unassigned"]
+    },
+    "assignment_method": {
+      "type": "string",
+      "enum": ["AA_BB_homozygotes", "freq_in_AA_vs_BB", "unassigned"]
+    },
+    "n_AA_samples_alt": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "n_AB_samples_alt": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "n_BB_samples_alt": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "f_AA": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "f_AB": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "f_BB": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "assignment_confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low", "unassigned"],
+      "description": "Per §6 thresholds: high = 95/5, medium = 80/20, low = mixed, unassigned = n_AA<3 or n_BB<3."
+    }
+  }
+}

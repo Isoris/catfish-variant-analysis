@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Isoris/catfish-variant-analysis/docs/atlas_schemas/sample_groups.out.schema.json",
+  "title": "Sample groups OUT — consolidated per-sample group assignments",
+  "description": "One row per sample in the cohort. Each per-inversion karyotype call goes in karyotypes (a sub-object), so the outer table stays rectangular. The fields here are the *per-sample* covariates KBC needs as group labels or model covariates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sample_id",
+    "cohort_tag",
+    "is_pruned_unrelated",
+    "karyotypes"
+  ],
+  "properties": {
+    "sample_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cohort_tag": {
+      "type": "string",
+      "description": "Must equal 'gariepinus_hatchery_226' for KBC inputs (three-cohort rule)."
+    },
+    "sex": {
+      "type": ["string", "null"],
+      "enum": ["male", "female", "unknown", null],
+      "description": "Phenotypic or genetic sex from the sample manifest, when available."
+    },
+    "family_hub_id": {
+      "type": ["string", "null"],
+      "description": "Family-hub assignment (HANDOFF.md rule 8). Used as a confound covariate, not a unit of analysis."
+    },
+    "is_pruned_unrelated": {
+      "type": "boolean",
+      "description": "True if the sample is in the NAToRA-pruned 81-unrelated subset. Headline KBC restricts to is_pruned_unrelated=true; secondary mixed-model mode uses the full cohort with kinship."
+    },
+    "ancestry_group": {
+      "type": ["string", "null"],
+      "description": "Hard-call ancestry assignment = argmax of NGSadmix Q row. Null when NGSadmix output was not supplied."
+    },
+    "ancestry_q": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      },
+      "minItems": 1,
+      "description": "Full NGSadmix Q vector (one entry per ancestral component, summing to 1.0 ± 1e-6). Null when not supplied. Component labels live in the parent manifest, not per-sample."
+    },
+    "f_roh": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Per-sample F_ROH = (Σ ROH lengths) / genome_length_bp. Null when ROH BEDs were not supplied."
+    },
+    "n_roh_segments": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Number of ROH segments for this sample. Null when ROH BEDs were not supplied."
+    },
+    "karyotypes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["karyotype_class"],
+        "properties": {
+          "karyotype_class": {
+            "type": "string",
+            "enum": ["AA", "AB", "BB", "NA"]
+          },
+          "posterior": {
+            "type": ["number", "null"],
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "description": "PCAngsd posterior for the assigned class. Null when not reported."
+          },
+          "posterior_cutoff_applied": {
+            "type": ["number", "null"],
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "description": "Echoed from sample_groups.in for provenance. Calls below this cutoff are returned as karyotype_class='NA'."
+          }
+        }
+      },
+      "description": "Map of inversion_id → karyotype call object. Inversions absent from the map are equivalent to karyotype_class='NA' for this sample."
+    },
+    "qc_flags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "low_coverage",
+          "outlier_pca",
+          "duplicate_candidate",
+          "manifest_only_no_data"
+        ]
+      },
+      "default": [],
+      "description": "Optional QC flags raised by upstream pipelines. KBC drops 'manifest_only_no_data' samples; the others propagate as covariates."
+    }
+  }
+}

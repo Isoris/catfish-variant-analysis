@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Isoris/catfish-variant-analysis/docs/atlas_schemas/deleterious_conservation.out.schema.json",
+  "title": "Deleterious/Conservation OUT — variant_master_scored row",
+  "description": "One row per biallelic variant after running the deleterious/conservation annotation stack. This is the file KBC reads as variant_master_scored.tsv. Tier-1/2/3 classification is downstream and not part of this schema — KBC derives it from the consequence + splice_subclass + sift_class + vesm_llr columns.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "variant_id",
+    "chrom",
+    "pos",
+    "ref",
+    "alt",
+    "gene_id",
+    "consequence",
+    "impact"
+  ],
+  "properties": {
+    "variant_id": { "type": "string" },
+    "chrom": { "type": "string", "minLength": 1 },
+    "pos": { "type": "integer", "minimum": 1 },
+    "ref": { "type": "string", "pattern": "^[ACGTNacgtn]+$" },
+    "alt": { "type": "string", "pattern": "^[ACGTNacgtn]+$" },
+    "gene_id": {
+      "type": ["string", "null"],
+      "description": "GFF3 gene_id of the most-impacted gene (SnpEff's canonical annotation). Null for intergenic variants."
+    },
+    "transcript_id": {
+      "type": ["string", "null"],
+      "description": "Canonical transcript_id reported by SnpEff for the most-impacted consequence."
+    },
+    "consequence": {
+      "type": "string",
+      "description": "SnpEff Sequence Ontology consequence label. May be a compound token joined by '&', ',', or ';'. KBC's tier1.is_tier1_lof splits on these separators and accepts the row if any token is one of {stop_gained, stop_lost, frameshift_variant, start_lost, splice_donor_variant, splice_acceptor_variant}."
+    },
+    "impact": {
+      "type": "string",
+      "enum": ["HIGH", "MODERATE", "LOW", "MODIFIER"],
+      "description": "SnpEff IMPACT category corresponding to the consequence."
+    },
+    "sift_class": {
+      "type": ["string", "null"],
+      "enum": ["DELETERIOUS", "DELETERIOUS_LOW_CONFIDENCE", "TOLERATED", "TOLERATED_LOW_CONFIDENCE", null],
+      "description": "SIFT4G class for missense variants. Null for non-missense or when SIFT4G could not score the protein."
+    },
+    "sift_score": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Raw SIFT4G score. Convention: ≤ 0.05 is DELETERIOUS."
+    },
+    "vesm_llr": {
+      "type": ["number", "null"],
+      "description": "Reference-frame VESM log-likelihood ratio for missense variants. Null for non-missense. KBC Tier 3 cutoff: vesm_llr ≤ −7."
+    },
+    "vesm_llr_haplotype_aware": {
+      "type": ["number", "null"],
+      "description": "Haplotype-aware VESM LLR produced by HAPS. Overlay column — KBC's headline does not consume this; it is reported for variants where HAPS disagrees with the reference-frame call."
+    },
+    "splice_subclass": {
+      "type": ["string", "null"],
+      "enum": [
+        "canonical_donor", "canonical_acceptor",
+        "class_a_donor_strengthening", "class_a_donor_weakening",
+        "class_a_acceptor_strengthening", "class_a_acceptor_weakening",
+        "class_b_branch_point", "class_b_exonic_enhancer", "class_b_intronic_silencer",
+        null
+      ],
+      "description": "Splice-module subclass. KBC Tier 1 uses canonical_donor / canonical_acceptor only. Tier 2 uses class_a_* but stays disabled until the §1.9 validation gate passes."
+    },
+    "splice_canonical_gt_ag_confirmed": {
+      "type": ["boolean", "null"],
+      "description": "Whether the dinucleotide at the affected intron edge is GT (donor) or AG (acceptor) on the reference. Null when not applicable."
+    },
+    "burden_score": {
+      "type": ["number", "null"],
+      "description": "Per-variant burden score from scoring_weights.tsv: weight assigned to this row's consequence. KBC's burden_score_sum = Σ burden_score × allele_dose."
+    },
+    "ref_aa": {
+      "type": ["string", "null"],
+      "pattern": "^[ACDEFGHIKLMNPQRSTVWY*]$",
+      "description": "Reference amino acid for missense variants."
+    },
+    "alt_aa": {
+      "type": ["string", "null"],
+      "pattern": "^[ACDEFGHIKLMNPQRSTVWY*]$"
+    },
+    "protein_position": {
+      "type": ["integer", "null"],
+      "minimum": 1
+    }
+  }
+}

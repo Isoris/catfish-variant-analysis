@@ -1,0 +1,5 @@
+inversion_id	pod_segment	chrom	start	end
+inv1	whole	chr1	1000	5000
+inv2	L	chr2	1000	2000
+inv2	M	chr2	2000	3000
+inv2	R	chr2	3000	4000

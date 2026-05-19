@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Isoris/catfish-variant-analysis/docs/atlas_schemas/sample_groups.in.schema.json",
+  "title": "Sample groups IN — upstream files needed to derive per-sample group assignments",
+  "description": "Manifest of paths and parameters consumed by the sample-groups builder. The builder reads each upstream file and emits one consolidated per-sample table conforming to sample_groups.out.schema.json. Each path is optional individually, but at least one upstream source must be supplied per group column the consumer wants populated (NA otherwise).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["cohort_tag", "sample_manifest_path"],
+  "properties": {
+    "cohort_tag": {
+      "type": "string",
+      "description": "Cohort identifier. KBC operates only on 'gariepinus_hatchery_226' (the three-cohort rule, HANDOFF.md §Hard rules)."
+    },
+    "sample_manifest_path": {
+      "type": "string",
+      "description": "Project sample sheet — defines the universe of sample_ids the output table must cover, with one row per sample. Columns expected: sample_id, sex (optional), family_hub_id (optional)."
+    },
+    "pcangsd_karyotype": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["calls_path", "posterior_cutoff"],
+      "properties": {
+        "calls_path": {
+          "type": "string",
+          "description": "Long table: sample_id × inversion_id → karyotype_class ∈ {AA, AB, BB}, with the per-call posterior. Built from PCAngsd K=3 + Hungarian arrangement-label matching."
+        },
+        "posterior_cutoff": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Per-call posterior threshold below which the karyotype is set to NA. Project-determined; flagged as an open question in HANDOFF.md."
+        }
+      }
+    },
+    "ngsadmix_ancestry": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["q_matrix_path", "k"],
+      "properties": {
+        "q_matrix_path": {
+          "type": "string",
+          "description": "NGSadmix .qopt file with one row per sample, K columns of admixture proportions."
+        },
+        "k": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Best-fit K used to produce the qopt."
+        },
+        "component_labels": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional human-readable labels for the K columns. Length must equal k.",
+          "default": []
+        }
+      }
+    },
+    "natora_pruned_unrelated": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["keep_list_path"],
+      "properties": {
+        "keep_list_path": {
+          "type": "string",
+          "description": "One-sample-per-line file listing the NAToRA-pruned unrelated subset. Sample_ids absent from the file get is_pruned_unrelated=false."
+        },
+        "pruning_threshold_phi": {
+          "type": ["number", "null"],
+          "minimum": 0.0,
+          "maximum": 0.5,
+          "description": "Kinship coefficient threshold used by NAToRA. Recorded for provenance."
+        }
+      }
+    },
+    "ngsrelate_kinship": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["res_path"],
+      "properties": {
+        "res_path": {
+          "type": "string",
+          "description": "ngsRelate 23-col .res file. Used by the mixed-model secondary mode."
+        }
+      }
+    },
+    "roh_per_sample": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["bed_dir"],
+      "properties": {
+        "bed_dir": {
+          "type": "string",
+          "description": "Directory containing one BED per sample (filename '<sample_id>.bed'). Used to derive F_ROH per sample."
+        },
+        "genome_length_bp": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Total callable genome length used as the F_ROH denominator. Typically the cohort callable-mask total length, not the raw assembly length."
+        }
+      }
+    },
+    "family_hubs": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["assignments_path"],
+      "properties": {
+        "assignments_path": {
+          "type": "string",
+          "description": "Two-column TSV: sample_id, family_hub_id. Family hubs are confounds (HANDOFF.md rule 8) — exposed so downstream models can condition on them."
+        }
+      }
+    }
+  }
+}

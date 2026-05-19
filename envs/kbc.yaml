@@ -1,0 +1,15 @@
+name: kbc
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.11
+  - pandas
+  - numpy
+  - scipy
+  - statsmodels
+  - cyvcf2
+  - pysam
+  - jsonschema
+  - pytest
+  - polars

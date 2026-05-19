@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Isoris/catfish-variant-analysis/docs/atlas_schemas/clair3.out.schema.json",
+  "title": "Clair3 OUT — normalized per-variant call row",
+  "description": "One row per (sample, biallelic variant) emitted from a Clair3 VCF after bcftools norm + bcftools view filtering. Multi-allelic sites must be split before this schema applies. Source: Modules/03_clair3.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sample_id",
+    "variant_id",
+    "chrom",
+    "pos",
+    "ref",
+    "alt",
+    "gt",
+    "dp",
+    "gq",
+    "filter"
+  ],
+  "properties": {
+    "sample_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "variant_id": {
+      "type": "string",
+      "description": "Canonical variant identifier in the form '{chrom}:{pos}:{ref}:{alt}' after left-normalization. Must be unique per (chrom,pos,ref,alt) across the joint VCF."
+    },
+    "chrom": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pos": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "1-based VCF position of the leftmost affected base."
+    },
+    "ref": {
+      "type": "string",
+      "pattern": "^[ACGTNacgtn]+$"
+    },
+    "alt": {
+      "type": "string",
+      "pattern": "^[ACGTNacgtn*]+$",
+      "description": "Single ALT allele. Multi-allelic sites must be split upstream (bcftools norm -m -any)."
+    },
+    "gt": {
+      "type": "string",
+      "enum": ["0/0", "0/1", "1/1", "./."],
+      "description": "Diploid hard-call genotype. './.' = missing."
+    },
+    "ploidy": {
+      "type": "integer",
+      "enum": [1, 2],
+      "default": 2,
+      "description": "Genotype ploidy. 1 only on contigs declared haploid for this sample in the Clair3 manifest."
+    },
+    "dp": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Per-sample read depth at this site (VCF FORMAT/DP)."
+    },
+    "ad_ref": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Read count supporting REF. From FORMAT/AD."
+    },
+    "ad_alt": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Read count supporting ALT. From FORMAT/AD."
+    },
+    "gq": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Genotype quality (FORMAT/GQ). Null if Clair3 did not emit GQ for this call."
+    },
+    "qual": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Site-level QUAL from the VCF."
+    },
+    "filter": {
+      "type": "string",
+      "description": "VCF FILTER column. 'PASS' for variants passing all filters; otherwise a semicolon-joined list (e.g. 'LowQual')."
+    },
+    "is_snp": {
+      "type": "boolean",
+      "description": "True if len(ref) == 1 and len(alt) == 1 and both are A/C/G/T."
+    },
+    "is_indel": {
+      "type": "boolean",
+      "description": "True if len(ref) != len(alt)."
+    },
+    "phase_set": {
+      "type": ["integer", "null"],
+      "description": "FORMAT/PS phase-set ID when the call is phased; null when unphased."
+    }
+  }
+}
